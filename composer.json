@@ -1,0 +1,33 @@
+{
+  "name": "objective-php/invokable",
+  "description": "Objective PHP Invokable component",
+  "type": "library",
+  "keywords": [
+    "invokable",
+    "objective php"
+  ],
+  "homepage": "https://github.com/objective-php/invokable",
+  "license": "GPL-3.0",
+  "authors": [
+    {
+      "name": "Gauthier 'Rusty' Delamarre",
+      "email": "gauthier@objective-php.org",
+      "role": "lead"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "objective-php/primitives": "1.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.*",
+    "objective-php/services-factory": "~1.0.0@dev",
+    "objective-php/events-handler": "~1.0.0@dev",
+    "objective-php/application": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "ObjectivePHP\\Invokable\\": "src/"
+    }
+  }
+}
