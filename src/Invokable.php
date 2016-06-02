@@ -21,6 +21,8 @@ use ObjectivePHP\ServicesFactory\ServiceReference;
 class Invokable extends AbstractInvokable
 {
 
+    protected $callable;
+
     protected $operation;
 
     /**
@@ -68,57 +70,66 @@ class Invokable extends AbstractInvokable
      */
     public function getCallable()
     {
-        $operation = $this->operation;
-        try
+
+        if(is_null($this->callable))
         {
-            if(!is_callable($operation))
+
+
+            $operation = $this->operation;
+            try
             {
-                if($operation instanceof ServiceReference)
+                if(!is_callable($operation))
                 {
-                    $serviceId = $operation->getId();
+                    if($operation instanceof ServiceReference)
+                    {
+                        $serviceId = $operation->getId();
 
-                    if(is_null($this->getServicesFactory()))
-                    {
-                        throw new Exception(sprintf('No ServicesFactory is available to build referenced service "%s"', $serviceId));
-                    }
+                        if(is_null($this->getServicesFactory()))
+                        {
+                            throw new Exception(sprintf('No ServicesFactory is available to build referenced service "%s"', $serviceId));
+                        }
 
-                    if(!$this->getServicesFactory()->has($operation))
-                    {
-                        throw new Exception(sprintf('Referenced service "%s" is not registered', $serviceId), Exception::REFERENCED_SERVICE_IS_NOT_REGISTERED);
-                    }
+                        if(!$this->getServicesFactory()->has($operation))
+                        {
+                            throw new Exception(sprintf('Referenced service "%s" is not registered', $serviceId), Exception::REFERENCED_SERVICE_IS_NOT_REGISTERED);
+                        }
 
-                    try
-                    {
-                        $operation = $this->getServicesFactory()->get($operation);
-                    } catch(ServicesFactoryException $e)
-                    {
-                        throw new Exception(sprintf('An error occurred when building referenced service "%s"', $serviceId), Exception::REFERENCED_SERVICE_BUILD_ERROR, $e);
-                    }
+                        try
+                        {
+                            $operation = $this->getServicesFactory()->get($operation);
+                        } catch(ServicesFactoryException $e)
+                        {
+                            throw new Exception(sprintf('An error occurred when building referenced service "%s"', $serviceId), Exception::REFERENCED_SERVICE_BUILD_ERROR, $e);
+                        }
 
-                    if(!is_callable($operation))
+                        if(!is_callable($operation))
+                        {
+                            throw new Exception(sprintf('Referenced service "%s" is not an instance of a callable class ("%s" should implement __invoke())', $serviceId, get_class($operation)), Exception::REFERENCED_SERVICE_IS_NOT_CALLABLE);
+                        }
+                    } elseif(class_exists($operation))
                     {
-                        throw new Exception(sprintf('Referenced service "%s" is not an instance of a callable class ("%s" should implement __invoke())', $serviceId, get_class($operation)), Exception::REFERENCED_SERVICE_IS_NOT_CALLABLE);
-                    }
-                } elseif(class_exists($operation))
-                {
-                    $operation = new $operation;
+                        $operation = new $operation;
 
-                    if(!is_callable($operation))
+                        if(!is_callable($operation))
+                        {
+                            throw new Exception(sprintf('Class "%s" is not callable (it should implement __invoke())', get_class($operation)), Exception::CLASS_IS_NOT_INVOKABLE);
+                        }
+                    } else
                     {
-                        throw new Exception(sprintf('Class "%s" is not callable (it should implement __invoke())', get_class($operation)), Exception::CLASS_IS_NOT_INVOKABLE);
+                        throw new Exception(sprintf('Class "%s" does not exist', $operation), Exception::CLASS_DOES_NO_EXIST);
                     }
-                } else
-                {
-                    throw new Exception(sprintf('Class "%s" does not exist', $operation), Exception::CLASS_DOES_NO_EXIST);
                 }
+
+            } catch(Exception $e)
+            {
+                throw new Exception(sprintf('Cannot run operation: %s', $this->getDescription()), Exception::FAILED_RUNNING_OPERATION, $e);
             }
 
-        } catch(Exception $e)
-        {
-            throw new Exception(sprintf('Cannot run operation: %s', $this->getDescription()), Exception::FAILED_RUNNING_OPERATION, $e);
+            // cache operation to callable resolution result
+            $this->callable = $operation;
         }
 
-        return $operation;
+        return $this->callable;
     }
 
     /**
@@ -128,7 +139,7 @@ class Invokable extends AbstractInvokable
     {
 
         $operation = $this->operation;
-
+        
         switch(true)
         {
 
