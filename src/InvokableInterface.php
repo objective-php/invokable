@@ -40,5 +40,9 @@
          */
         public function getApplication() : ApplicationInterface;
 
+	/**
+	 * @return callable
+	 */
+	public function getCallable();
 
     }
