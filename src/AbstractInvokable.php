@@ -66,5 +66,9 @@ class AbstractInvokable implements InvokableInterface
         return 'Instance of Invokable class ' . get_class($this);
     }
 
+    public function getCallable()
+    {
+	return $this;
+    }
 
 }
