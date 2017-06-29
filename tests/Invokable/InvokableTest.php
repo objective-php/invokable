@@ -179,6 +179,27 @@
             }, Exception::class, null, Exception::REFERENCED_SERVICE_IS_NOT_CALLABLE);
 
         }
+        
+        
+        public function testGetServicesFactoryReturnsApplicationServicesFactoryByDefaultOnly()
+        {
+            $servicesFactoryFromApplication = new ServicesFactory();
+            $application                    = $this->getMockForAbstractClass(ApplicationInterface::class);
+            $application->expects($this->exactly(1))->method('getServicesFactory')->willReturn($servicesFactoryFromApplication);
+            
+            $invokable = new Invokable('whatever');
+            $invokable->setApplication($application);
+            
+            $this->assertSame($servicesFactoryFromApplication, $invokable->getServicesFactory());
+            
+            $otherServicesFactory = new ServicesFactory();
+            
+            $invokable->setServicesFactory($otherServicesFactory);
+            
+            $this->assertSame($otherServicesFactory, $invokable->getServicesFactory());
+            
+            
+        }
     }
 
 
