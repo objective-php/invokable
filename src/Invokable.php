@@ -1,8 +1,10 @@
 <?php
 namespace ObjectivePHP\Invokable;
 
+use Interop\Container\ContainerInterface;
 use ObjectivePHP\ServicesFactory\Exception\Exception as ServicesFactoryException;
 use ObjectivePHP\ServicesFactory\ServiceReference;
+use ObjectivePHP\ServicesFactory\ServicesFactory;
 
 /**
  * Class Invokable
@@ -24,7 +26,12 @@ class Invokable extends AbstractInvokable
     protected $callable;
 
     protected $operation;
-
+    
+    /**
+     * @var ServicesFactory
+     */
+    protected $servicesFactory;
+    
     /**
      * Invokable constructor.
      * @param $operation
@@ -181,5 +188,12 @@ class Invokable extends AbstractInvokable
 
         return $description;
     }
-
+    
+    public function setServicesFactory(ContainerInterface $servicesFactory)
+    {
+        $this->servicesFactory = $servicesFactory;
+        
+        return $this;
+    }
+    
 }

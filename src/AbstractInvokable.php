@@ -56,7 +56,7 @@ class AbstractInvokable implements InvokableInterface
      */
     public function getServicesFactory() : ServicesFactory
     {
-        return $this->application->getServicesFactory();
+        return $this->servicesFactory ?? $this->application->getServicesFactory();
     }
 
     
